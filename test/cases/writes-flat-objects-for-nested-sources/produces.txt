@@ -1,0 +1,3 @@
+build/daukle/c/src_main.o
+build/daukle/c/src_util.o
+build/daukle/c/src_sub_util.o

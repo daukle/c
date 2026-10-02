@@ -1,0 +1,15 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+version = "21"
+output = "hello"
+
+[toolchains.c.sources]
+first = "src/main.c"

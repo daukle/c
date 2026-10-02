@@ -1,0 +1,14 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+version = "21"
+sources = ["src/main.c"]
+output = "hello"
+std = 17

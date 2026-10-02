@@ -1,0 +1,16 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+version = "21"
+sources = ["src/main.c", "src/greet.c"]
+output = "hello"
+std = "c17"
+defines = ["BUILT_BY_DAUKLE"]
+includeDirs = ["include"]

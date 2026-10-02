@@ -1,0 +1,1 @@
+"sources" is empty, so there is nothing to compile

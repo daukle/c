@@ -1,0 +1,13 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins.fixture]
+path = "./plugins/fixture.lua"
+
+[plugins.fixture.requires]
+cbase = { path = "./plugins/c" }
+
+[toolchains.fixture]

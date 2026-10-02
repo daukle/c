@@ -1,0 +1,15 @@
+schema = 1
+project = "example/c-hello-executable"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+version = "21"
+sources = ["src/main.c", "src/greet.c"]
+output = "hello"
+std = "c17"
+includeDirs = ["include"]

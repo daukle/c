@@ -1,0 +1,2 @@
+'stdio.h' file not found
+could not find the standard header "stdio.h"
