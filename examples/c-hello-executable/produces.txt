@@ -1,2 +1,0 @@
-build/daukle/c/src_main.o
-build/daukle/c/src_greet.o

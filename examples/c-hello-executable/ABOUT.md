@@ -4,18 +4,27 @@ A managed C project. The repository holds `daukle.toml`, `src/` and `include/` a
 file**: no `CMakeLists.txt`, no `Makefile`, no configure script. daukle downloads a clang, verifies
 it against a digest the plugin pins, and runs it directly.
 
+```console
+$ daukle c:link
+$ ./build/daukle/c/hello
+hello from daukle
 ```
-daukle c:compile    # one clang -c per source, into build/daukle/c/
-daukle c:link       # links build/daukle/c/hello and depends on c:compile
-daukle tasks        # lists the two tasks the plugin declares and their order
-```
+
+`daukle c:compile` runs one `clang -c` per source into `build/daukle/c/` and `c:link` depends on it,
+so linking compiles first. `daukle tasks` lists the two tasks and their order.
+
+**There is no `c:run`, and the second line above is why that costs nothing.** A toolchain that
+links a program does not have to learn how to start one: running it is just a second command, and
+asserting on what the program printed is a stronger claim than asserting that its object files
+exist.
 
 ## What to look at
 
-**This copy points at the working tree, and a real project names a coordinate.** The manifest here
-says `c = "./plugins/c"` so that the suite in this repository tests the plugin as it stands; a red
-example then means a real defect rather than a stale release. In your own project the two lines are
-a pinned resolver and a coordinate.
+**This example names a published coordinate, exactly as your project would.** Nothing points at a
+working tree, so the directory can be copied anywhere and `daukle sync` works. The suite then runs
+it twice, once as committed against the published release and once with this repository's working
+tree staged over a copy, so a break in the plugin as it stands reddens this repository rather than
+waiting for a release.
 
 **`sources` is an explicit list.** There is no glob and no directory form, because the verb
 vocabulary has no way to list a directory. That is a real cost of a toolchain with no build system
@@ -60,15 +69,16 @@ downloads, expanding to 0.679 GiB and 1.353 GiB respectively. It is cached per d
 shared by every project on the machine that pins the same compiler. It is the largest provision in
 this org by some margin, and a daukle older than `ce92465` refuses the Windows one outright.
 
-## The `.txt` files, which are harness inputs rather than part of the example
+## The one file that is a harness input rather than part of the example
 
-`task.txt`, `produces.txt`, `runs.txt` and `expect-output.txt` are read by `test/run.sh`, not by
-daukle. They name the task CI runs here, the files it must write, the program to execute afterwards
-and the clause its output must contain. They sit beside the example rather than in `test/` so each
-example carries its own expectations.
+`needs-tools` is the marker that makes this example skip unless `DAUKLE_EXAMPLE_E2E=1` is set, so a
+local run does not download half a gigabyte unasked. CI sets it on every runner.
 
-`needs-clang` is the marker that makes this example skip unless `DAUKLE_C_E2E=1` is set, so a local
-run does not download half a gigabyte unasked. CI sets it on every runner.
+It replaced four sidecars, which is the clearest case in this organization for the `console` block
+above: `task.txt`, `produces.txt`, `runs.txt` and `expect-output.txt` all said in a file what the
+block now says in the document a reader was already reading. **The two object files `produces.txt`
+named are no longer asserted, and that is a deliberate loss**: a linked program that runs and
+prints the right line is a stronger claim than two `.o` files existing.
 
 **There is no committed executable here, and nothing is missing.** `c:link` really does build it;
 `build/` is gitignored, which is the only reason you cannot see the result in the repository.
