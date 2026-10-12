@@ -1,0 +1,15 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins.fixture]
+path = "./plugins/fixture.lua"
+
+# daukle/c has no release, so the alias the fixture declares is overridden with
+# the staged copy. This is the manifest-side form the declaration refuses.
+[plugins.fixture.requires]
+cbase = { path = "./plugins/c" }
+
+[toolchains.fixture]

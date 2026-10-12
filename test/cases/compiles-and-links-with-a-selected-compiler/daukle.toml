@@ -1,0 +1,19 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+# The whole point of the case: a second compiler, by published coordinate, with
+# every other key unchanged from the default-compiler case beside it.
+compiler = "gcc"
+version = "15"
+sources = ["src/main.c", "src/greet.c"]
+output = "hello"
+std = "c17"
+defines = ["BUILT_BY_DAUKLE"]
+includeDirs = ["include"]
