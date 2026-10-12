@@ -233,10 +233,17 @@ failure from passing every other case.
 `DAUKLE_C_E2E=1`. CI sets it on every runner, because the per-platform archives and the flag tables
 above are exercised by nothing else.
 
-**A case carrying `only-hosts` names the hosts it can run on**, one per line, in daukle's spelling,
-and is skipped elsewhere. It exists because host coverage is per compiler: there is no macOS gcc at
-any version, so a case that provisions one can only run where an archive exists. The alternative
-would be a case that passes by being refused, which asserts the registry rather than the compile.
+**A `needs-tools` that NAMES hosts is also a host gate**, one per line, in daukle's spelling, with
+an empty file meaning every host. A case naming hosts is skipped elsewhere, and a name that is no
+host at all is a FAILURE rather than a skip: a typo would otherwise hide the case on every runner at
+once, which looks exactly like a green organization.
+
+It exists because host coverage is per compiler: there is no macOS gcc at any version, so a case
+that provisions one can only run where an archive exists. The alternative would be a case that
+passes by being refused, which asserts the registry rather than the compile. **The marker and its
+spelling are core's**, shared with `tools/run-examples.sh` so that one idea has one convention, and
+the HOST gate is read before the E2E gate in both: an unsupported host is permanent where a missing
+flag is not.
 
 ```sh
 DAUKLE=/path/to/daukle DAUKLE_C_E2E=1 sh test/cases.sh

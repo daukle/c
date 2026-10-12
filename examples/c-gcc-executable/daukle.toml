@@ -1,0 +1,22 @@
+schema = 1
+project = "daukle/example-c-gcc-executable"
+version = "1.0.0"
+
+[modules]
+
+[resolvers.github]
+url = "https://raw.githubusercontent.com/daukle/daukle/1f515141e06d16eace718a45944a39933611fa39/plugins/github-releases.lua"
+sha256 = "3789865c266eb53fafcf7300d77a24461170c615195d92d0ddf88078c556e23e"
+
+[plugins]
+c = { resolver = "github", coordinate = "daukle/c@^1.1.0" }
+
+[toolchains.c]
+# The whole point of this example. Everything below it is identical to
+# c-hello-executable, which omits the key and gets clang.
+compiler = "gcc"
+version = "15"
+sources = ["src/main.c", "src/greet.c"]
+output = "hello"
+std = "c17"
+includeDirs = ["include"]

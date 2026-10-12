@@ -26,14 +26,16 @@ passed=0
 failed=0
 skipped=0
 
-# daukle's spelling of the host, because that is what a case's only-hosts file
+# daukle's spelling of the host, because that is what a case's needs-tools
 # names and what the compiler registry is keyed on.
 case $(uname -s) in
   Linux*) host=linux ;;
   Darwin*) host=macos ;;
   MINGW*|MSYS*|CYGWIN*|Windows*) host=windows ;;
-  *) host=$(uname -s) ;;
+  *) host=unknown ;;
 esac
+
+KNOWN_HOSTS="linux macos windows"
 
 fail() {
   echo "FAIL $1: $2" >&2
@@ -186,29 +188,44 @@ run_case() {
     manifest_name=$(basename "$manifest")
     label="$name/$manifest_name"
 
-    # A compiler archive is a quarter of a gigabyte on Linux and half of one on
-    # Windows, which no local run should pay for unasked. CI sets the variable
-    # on every runner, because the per-platform archives and the per-compiler
-    # flag tables are exercised by nothing else.
-    if [ -f "$case_dir/needs-tools" ] && [ "${DAUKLE_C_E2E:-}" != "1" ]; then
-      echo "skip $label: set DAUKLE_C_E2E=1 to run it here" >&2
-      skipped=$((skipped + 1))
-      continue
-    fi
-
-    # Not every compiler is published for every host: xpack ships no macOS gcc
-    # at any version, so a case that provisions one can only run where an
-    # archive exists. The alternative is a case that passes by being refused,
-    # which asserts the registry rather than the compile.
-    if [ -f "$case_dir/only-hosts" ]; then
-      allowed=$(tr '\n' ' ' <"$case_dir/only-hosts")
-      case " $allowed " in
-        *" $host "*) ;;
-        *)
-          echo "skip $label: it runs on ${allowed}only, and this host is $host" >&2
+    # The same marker and the same spelling as core's example harness, so one
+    # idea has one convention: needs-tools gates on the provision, and its
+    # CONTENT optionally names the hosts, empty meaning every host.
+    #
+    # The HOST gate is read first for the reason core's is: both can apply at
+    # once and only one message can be printed, and an unsupported host is
+    # permanent where a missing flag is not.
+    if [ -f "$case_dir/needs-tools" ]; then
+      set -- $(tr -d '\r' <"$case_dir/needs-tools")
+      if [ "$#" -gt 0 ]; then
+        for candidate in "$@"; do
+          case " $KNOWN_HOSTS " in
+            *" $candidate "*) ;;
+            *)
+              fail "$label" "needs-tools names \"$candidate\", which is no host daukle knows"
+              continue 2 ;;
+          esac
+        done
+        allowed=no
+        for candidate in "$@"; do
+          if [ "$candidate" = "$host" ]; then allowed=yes; fi
+        done
+        if [ "$allowed" = no ]; then
+          echo "skip $label: it runs on $* only, and this host is $host" >&2
           skipped=$((skipped + 1))
-          continue ;;
-      esac
+          continue
+        fi
+      fi
+
+      # A compiler archive is a quarter of a gigabyte on Linux and half of one
+      # on Windows, which no local run should pay for unasked. CI sets the
+      # variable on every runner, because the per-platform archives and the
+      # per-compiler flag tables are exercised by nothing else.
+      if [ "${DAUKLE_C_E2E:-}" != "1" ]; then
+        echo "skip $label: set DAUKLE_C_E2E=1 to run it here" >&2
+        skipped=$((skipped + 1))
+        continue
+      fi
     fi
 
     sandbox="$work/$name-$manifest_name"
@@ -218,7 +235,7 @@ run_case() {
     rm -rf "$sandbox/expected" "$sandbox/expect-error.txt" "$sandbox/task.txt" \
            "$sandbox/produces.txt" "$sandbox/expect-task-error.txt" \
            "$sandbox/expect-task-absent.txt" "$sandbox/expect-output.txt" \
-           "$sandbox/runs.txt" "$sandbox/needs-tools" "$sandbox/only-hosts"
+           "$sandbox/runs.txt" "$sandbox/needs-tools"
     stage_plugin "$sandbox"
 
     if [ -f "$case_dir/expect-error.txt" ]; then
