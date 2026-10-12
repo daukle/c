@@ -1,0 +1,2 @@
+"msvc" is not a compiler this toolchain knows
+It knows clang, gcc

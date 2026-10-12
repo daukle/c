@@ -1,0 +1,17 @@
+schema = 1
+project = "example/app"
+version = "1.0.0"
+
+[modules]
+
+[plugins]
+c = "./plugins/c"
+
+[toolchains.c]
+version = "21"
+# This plugin provisions and pins what it drives, so a compiler it has no
+# published archive for cannot be selected. MSVC is the real case: it ships
+# inside a Visual Studio installation rather than as an archive with a digest.
+compiler = "msvc"
+sources = ["src/main.c"]
+output = "hello"

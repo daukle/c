@@ -37,8 +37,12 @@ under it, and it is stated rather than worked around.
 `#include "greet.h"` in `src/main.c` only resolves because the plugin passes `-Iinclude`.
 
 **`version = "21"` is an exact major version and is required.** `">=17"` is refused and there is no
-default: the plugin ships a table of pinned clang archives with their published digests, and
+default: the plugin ships a registry of pinned compiler archives with their published digests, and
 matching a range would mean a semver implementation in Lua.
+
+**There is no `compiler` key here, and that is the point.** It is optional, and omitting it takes
+the registry's default, which is clang. A project that wants gcc writes `compiler = "gcc"` and
+`version = "15"`, and nothing else in this manifest changes.
 
 ## What this example cannot show
 
@@ -52,6 +56,12 @@ build this, which is the honest cost of the design rather than a defect.
 reaches a file the build just wrote. `daukle.tool` names a member of a provisioned root, and the
 executable here is neither. The example is checked by the test harness running `build/daukle/c/hello`
 itself, which daukle cannot do for you.
+
+**A second compiler.** This example uses the default, so it says nothing about `compiler = "gcc"`.
+That is covered by `test/cases/compiles-and-links-with-a-selected-compiler`, which provisions a real
+gcc and asserts that `__clang__` is undefined and `__GNUC__` is 15. It is a case rather than an
+example because **xpack publishes no macOS gcc at any version**, and the example harness has no
+per-host gate while this repository's case harness does.
 
 **C++.** `clang++` and a `libc++` tree are in the same archive and this toolchain exercises neither.
 A C++ surface needs a standard-library decision that has not been taken.
