@@ -43,9 +43,10 @@ daukle.toolchain{
       local row = PUBLISHED[index]
       local pick = compilers.for_host{ os = row.os, arch = row.arch,
                                        version = row.version, compiler = row.compiler }
-      lines[#lines + 1] = string.format("%s %s/%s %s %s %s %s",
+      lines[#lines + 1] = string.format("%s %s/%s %s %s %s %s %s",
                                         row.compiler or "default", row.os, row.arch,
-                                        pick.binary, pick.url, pick.sha256, pick.home)
+                                        pick.binary, pick.url, pick.sha256, pick.home,
+                                        pick.sdk_query and pick.sdk_query.tool or "-")
     end
     return { ["report.txt"] = table.concat(lines, "\n") .. "\n" }
   end,
