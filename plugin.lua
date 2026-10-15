@@ -1,4 +1,4 @@
-daukle.plugin{ api = 1, uses = { "provision", "exec" }, exports = { "lib/compilers" } }
+daukle.plugin{ api = 1, uses = { "provision", "exec", "tool" }, exports = { "lib/compilers" } }
 
 local compilers = daukle.require("lib/compilers")
 
@@ -236,13 +236,24 @@ local function append(argv, extra)
   return argv
 end
 
+-- Asked once per task and passed to the compile AND the link, so the headers
+-- a source compiled against come from the SDK it is then linked against.
+local function sysroot_args(pick)
+  local query = pick.sdk_query
+  if query == nil then return {} end
+  local result = daukle.exec(daukle.tool(query.tool), query.args, { capture = true })
+  return { "-isysroot", (string.gsub(result.stdout, "%s+$", "")) }
+end
+
 daukle.task{
   name = "c:compile",
   run = function(context)
     local spec = read(context)
     local compiler, pick = provision_compiler(context, spec)
+    local sysroot = sysroot_args(pick)
     for index = 1, #spec.sources do
-      local argv = { "-c", context.root .. "/" .. spec.sources[index], "-o", spec.objects[index] }
+      local argv = append({ "-c", context.root .. "/" .. spec.sources[index],
+                            "-o", spec.objects[index] }, sysroot)
       if spec.std ~= nil then argv[#argv + 1] = "-std=" .. spec.std end
       if spec.defines ~= nil then
         for at = 1, #spec.defines do argv[#argv + 1] = "-D" .. spec.defines[at] end
@@ -267,6 +278,7 @@ daukle.task{
     for index = 1, #spec.objects do argv[#argv + 1] = spec.objects[index] end
     argv[#argv + 1] = "-o"
     argv[#argv + 1] = spec.output
+    append(argv, sysroot_args(pick))
     append(argv, pick.link_flags)
     run_compiler(pick, compiler, append(argv, spec.linkArgs))
   end,

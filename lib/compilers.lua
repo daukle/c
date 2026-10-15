@@ -107,6 +107,18 @@ local PREREQUISITE = {
             .. ' provisioned tree is incomplete rather than that the host is',
 }
 
+--[[ Per host, for the reason PREREQUISITE is: on macOS every provisioned
+     compiler links with the host's ld, and that ld belongs to whichever
+     developer directory xcode-select names, while xpack's clang hardcodes the
+     Command Line Tools SDK as its sysroot. Measured 2026-10-15 (D-138): an
+     image with Xcode 26.6 selected and a CLT SDK 27 installed failed every
+     link, because ld 26.6 cannot read SDK 27's stubs. xcrun is how Apple's own
+     clang shim picks the SDK, so asking it keeps the SDK and the linker one
+     installation. ]]
+local SDK_QUERY = {
+  macos = { tool = "xcrun", args = { "--show-sdk-path" } },
+}
+
 local BY_ID = {}
 local NAMES = {}
 for index = 1, #COMPILERS do
@@ -173,6 +185,7 @@ local function for_host(request)
     link_flags = descriptor.link_flags[os_name],
     missing_header = descriptor.missing_header,
     prerequisite = string.format(prerequisite[os_name], descriptor.binary),
+    sdk_query = SDK_QUERY[os_name],
   }
 end
 
