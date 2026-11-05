@@ -260,8 +260,5 @@ Windows drive letter as a remote host, so the path must be written `/c/...`.
 
 ## Provenance
 
-The `FetchContent` writer this repository used to hold moved to `daukle/cmake`, where `1.0.1` ships
-it as `deps.lua`. It had to move: core refuses a chunk holding `exec` or `provision` to declare
-`daukle.language` at all, so the commit that makes this plugin provision a compiler is the commit
-that makes its own `daukle.language` illegal. Its seven test cases went with it and run there as
-`deps-*`.
+The `FetchContent` writer this repository used to hold moved to `daukle/cmake` as `deps.lua`, and
+was removed there with adopted mode in daukle `0.19.0`.

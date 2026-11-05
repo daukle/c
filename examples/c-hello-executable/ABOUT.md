@@ -69,8 +69,8 @@ A C++ surface needs a standard-library decision that has not been taken.
 **More than one output.** One link step, one executable. Several targets is what `daukle/cmake` is
 for.
 
-**An external dependency.** This toolchain compiles your sources and nothing else. Coordinates for
-C libraries are what `daukle/cmake`'s `deps.lua` writer is for, against a `CMakeLists.txt` you own.
+**An external dependency.** This toolchain compiles your sources and nothing else. C libraries
+are `daukle/cmake`'s `[toolchains.cmake.dependencies]`.
 
 ## The first run is slow
 
